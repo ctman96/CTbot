@@ -60,7 +60,7 @@ bot.on('message', msg => {
 	if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
 
 	if(msg.content == '!doge') {
-		get_gif("doge pupper", function(url){
+		get_gif(["doge","pupper"], function(url){
 			if (url !== undefined)
 				msg.channel.sendMessage(url);
 			else
