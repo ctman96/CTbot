@@ -38,7 +38,8 @@ function get_gif(tags, func){
 		else {
 			try{
 				var response = JSON.parse(body);
-				func(responseObj.data.image_url);
+
+				func(response.data.image_url);
 			} catch (e){
 				func(undefined);
 			}
