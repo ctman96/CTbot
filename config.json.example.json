@@ -1,5 +1,6 @@
 {
 	"MY_ID" : "client id",
+	"SECRET_KEY" : "secret",
 	"USERNAME" : "bot username",
 	"TOKEN" : "bot token"
 }
