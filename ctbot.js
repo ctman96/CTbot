@@ -50,12 +50,12 @@ bot.on('message', msg => {
 	//List of commands. Make sure to update
 	if(msg.content == '!commands'){
 		msg.channel.sendMessage('Available Commands:');
-		msg.channel.sendMessage('ping : check if bot is alive');
+		msg.channel.sendMessage('!ping : check if bot is alive');
 		msg.channel.sendMessage('!img : send test image');
 		msg.channel.sendMessage('!doge : random doge. giphy test function using fixed tags');
 	}
 
-	if (msg.content === 'ping') msg.reply('Pong!');
+	if (msg.content === '!ping') msg.reply('Pong!');
 
 	if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
 
