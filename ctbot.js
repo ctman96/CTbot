@@ -74,7 +74,7 @@ bot.on('message', msg => {
 		var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
 		var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
 		
-		if (command == gif){
+		if (command == 'gif'){
 			get_gif(args, function(url){
 				if (url !== undefined)
 					msg.channel.sendMessage(url);
