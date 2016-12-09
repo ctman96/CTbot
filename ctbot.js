@@ -7,7 +7,7 @@ try {
 } catch (e){
 	console.log("Could not find config.json, checking for config vars...");
 	try{
-		var AuthDetails = require("./config-vars")
+		var AuthDetails = process.env;
 	} catch (e){
 		console.log("Could not find config-vars, exiting")
 		process.exit();
