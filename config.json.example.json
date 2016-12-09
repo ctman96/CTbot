@@ -2,5 +2,6 @@
 	"MY_ID" : "client id",
 	"SECRET_KEY" : "secret",
 	"USERNAME" : "bot username",
-	"TOKEN" : "bot token"
+	"TOKEN" : "bot token",
+	"YOUTUBE_KEY" : "youtube api key"
 }

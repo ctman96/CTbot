@@ -19,7 +19,7 @@ try {
 }
 
 var giphy_key = "dc6zaTOxFJmzC";
-var youtube_key = "AIzaSyAw5MsLU5Nz9rqYTkPib61PJYL49hLvHx8";
+var youtube_key = AuthDetails.YOUTUBE_KEY;
 var youtube_id = "PLLKyePPBYFXE8wmCJEFC_OalwE-CY9X9z";
 
 bot.on('ready', () => {
