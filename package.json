@@ -1,0 +1,16 @@
+{
+  "name": "ctbot",
+  "version": "0.1.0",
+  "description": "basic personal discord bot",
+  "main": "ctbot.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "ctman96",
+  "dependencies": {
+    "discord.js": "^10.0.1"
+  },
+  "engines": {
+    "node": "6.9.2"
+  }
+}
