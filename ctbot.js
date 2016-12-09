@@ -47,13 +47,14 @@ function get_gif(tags, func){
 	}.bind(this));
 }
 
+//Todo: move old commands over to new parsing
 bot.on('message', msg => {
 	//List of commands. Make sure to update
 	if(msg.content == '!commands'){
 		msg.channel.sendMessage('Available Commands:');
 		msg.channel.sendMessage('!ping : check if bot is alive');
 		msg.channel.sendMessage('!img : send test image');
-		msg.channel.sendMessage('!doge : random doge. giphy test function using fixed tags');
+		msg.channel.sendMessage('!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif');
 	}
 
 	if (msg.content === '!ping') msg.reply('Pong!');
@@ -67,9 +68,21 @@ bot.on('message', msg => {
 			else
 				msg.channel.sendMessage("Error retrieving gif. Sorry!");
 		});
+	}
+
+	if(msg.content[0] == '!'){
+		var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
+		var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
+		
+		if (command == gif){
+			get_gif(args, function(url){
+				if (url !== undefined)
+					msg.channel.sendMessage(url);
+				else
+					msg.channel.sendMessage("Error retrieving gif. Sorry!");
+			});
+		}
 	};
-
-
 
 });
 
