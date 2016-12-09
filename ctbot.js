@@ -104,35 +104,37 @@ bot.on('message', msg => {
 	if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
 
 	if(msg.content[0] == '!'){
-		var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
-		var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
-		
-		if (command == 'gif'){
-			console.log("Command received: "+msg);
-			get_gif(args, function(url){
-				if (url !== undefined){
-					msg.channel.sendMessage(url);
-					console.log("Successfully retrieved gif:"+url);
-				}
-				else{
-					msg.channel.sendMessage("Error retrieving gif. Sorry!");
-					console.log("Error retrieving gif, returned undefined");
-				}
-			});
-		}
+		if(msg.author.id != bot.user.id){
+			var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
+			var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
+			
+			if (command == 'gif'){
+				console.log("Command received: "+msg);
+				get_gif(args, function(url){
+					if (url !== undefined){
+						msg.channel.sendMessage(url);
+						console.log("Successfully retrieved gif:"+url);
+					}
+					else{
+						msg.channel.sendMessage("Error retrieving gif. Sorry!");
+						console.log("Error retrieving gif, returned undefined");
+					}
+				});
+			}
 
-		if(command == 'video') {
-			console.log("Command received: "+msg);
-			get_youtube([undefined,undefined], function(url){
-				if (url !== undefined){
-					msg.channel.sendMessage(url);
-					console.log("Successfully retrieved video:"+url);
-				}
-				else{
-					msg.channel.sendMessage("Error retrieving video. Sorry!");
-					console.log("Error retrieving video, returned undefined");
-				}
-			});
+			if(command == 'video') {
+				console.log("Command received: "+msg);
+				get_youtube([undefined,undefined], function(url){
+					if (url !== undefined){
+						msg.channel.sendMessage(url);
+						console.log("Successfully retrieved video:"+url);
+					}
+					else{
+						msg.channel.sendMessage("Error retrieving video. Sorry!");
+						console.log("Error retrieving video, returned undefined");
+					}
+				});
+			}
 		}
 	}
 });
