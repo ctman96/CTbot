@@ -48,43 +48,17 @@ function get_gif(tags, func){
 		}
 	}.bind(this));
 }
-//Pull a random video from the playlist, and return a link to it
-function get_video(arg, func){
-	var request = require("request")
-	var q = 'https://www.googleapis.com/youtube/v3/playlistItems?key='+youtube_key+"&part=contentDetails&maxResults=50&playlistId="+youtube_id;
-	console.log("requesting youtube data "+ q);
-	request(q,function(error,response,body){
-		if (error || response.statusCode !== 200) {
-			console.error("video: Got error: " + body);
-			console.log(error);
-		}
-		else {
-			try{
-				var response = JSON.parse(body);
-				var length = response.pageInfo.totalResults;
-				var num = Math.floor(Math.random()*(length)+1)-1;
-				console.log("Found "+length+" videos, getting video "+num);
-				if(num<50){
-					func("https://www.youtube.com/watch?v="+response.items[num].contentDetails.videoId);
-				} else {
-					get_youtube([num-50, response.nextPageToken], function(url){
-						func(url);
-					});
-				}
-			} catch (e){
-				func(undefined);
-			}
-		}
-	}.bind(this));
-}
-//continue get_video by recursively searching through the playlist pages
+
+//pull a random youtube video by recursively searching through the playlist pages
 function get_youtube(args, func){
 	var request = require("request");
 	var num = args[0];
 	var next_page = args[1];
 	var q = 'https://www.googleapis.com/youtube/v3/playlistItems?key='+youtube_key+"&part=contentDetails&maxResults=50&playlistId="+youtube_id;
-	q+="&pageToken="+next_page;
-	console.log("requesting youtube data "+ q);
+	if(next_page !== undefined){
+		q+="&pageToken="+next_page;
+	}
+	console.log("Sending request: "+ q);
 	request(q,function(error,response,body){
 		if (error || response.statusCode !== 200) {
 			console.error("youtube: Got error: " + body);
@@ -93,9 +67,15 @@ function get_youtube(args, func){
 		else {
 			try{
 				var response = JSON.parse(body);
+				if (num == undefined){
+					var length = response.pageInfo.totalResults;
+					num = Math.floor(Math.random()*(length)+1)-1;
+					console.log("Found "+length+" videos. Getting video #"+num);
+				}
 				if(num<50){
 					func("https://www.youtube.com/watch?v="+response.items[num].contentDetails.videoId);
 				} else {
+					console.log("Continuing to next page...");
 					get_youtube([num-50, response.nextPageToken], function(url){
 						func(url);
 					});
@@ -123,38 +103,38 @@ bot.on('message', msg => {
 
 	if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
 
-	if(msg.content == '!doge') {
-		get_gif(["doge","pupper"], function(url){
-			if (url !== undefined)
-				msg.channel.sendMessage(url);
-			else
-				msg.channel.sendMessage("Error retrieving gif. Sorry!");
-		});
-	}
-
-	if(msg.content == '!video') {
-		get_video("", function(url){
-			if (url !== undefined)
-				msg.channel.sendMessage(url);
-			else
-				msg.channel.sendMessage("Error retrieving video. Sorry!");
-		});
-	}
-
 	if(msg.content[0] == '!'){
 		var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
 		var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
 		
 		if (command == 'gif'){
+			console.log("Command received: "+msg);
 			get_gif(args, function(url){
-				if (url !== undefined)
+				if (url !== undefined){
 					msg.channel.sendMessage(url);
-				else
+					console.log("Successfully retrieved gif:"+url);
+				}
+				else{
 					msg.channel.sendMessage("Error retrieving gif. Sorry!");
+					console.log("Error retrieving gif, returned undefined");
+				}
 			});
 		}
-	};
 
+		if(command == 'video') {
+			console.log("Command received: "+msg);
+			get_youtube([undefined,undefined], function(url){
+				if (url !== undefined){
+					msg.channel.sendMessage(url);
+					console.log("Successfully retrieved video:"+url);
+				}
+				else{
+					msg.channel.sendMessage("Error retrieving video. Sorry!");
+					console.log("Error retrieving video, returned undefined");
+				}
+			});
+		}
+	}
 });
 
 bot.login(AuthDetails.TOKEN);
