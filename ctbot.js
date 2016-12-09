@@ -67,8 +67,12 @@ function get_youtube(args, func){
 		else {
 			try{
 				var response = JSON.parse(body);
+				var length = response.pageInfo.totalResults;
+				if (num >= length || num < 0){
+					console.log('invalid number given');
+					func(undefined);
+				}
 				if (num == undefined){
-					var length = response.pageInfo.totalResults;
 					num = Math.floor(Math.random()*(length)+1)-1;
 					console.log("Found "+length+" videos. Getting video #"+num);
 				}
@@ -124,7 +128,11 @@ bot.on('message', msg => {
 
 			if(command == 'video') {
 				console.log("Command received: "+msg);
-				get_youtube([undefined,undefined], function(url){
+				var num = undefined;
+				if (isNaN(args))
+					num = parseInt(args);
+				console.log(num);
+				get_youtube([num,undefined], function(url){
 					if (url !== undefined){
 						msg.channel.sendMessage(url);
 						console.log("Successfully retrieved video:"+url);
