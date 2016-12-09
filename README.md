@@ -1,2 +1,2 @@
 # CTbot
-Discord bot. Just messing around with discord.js
+My personal discord bot. Just messing around with discord.js
