@@ -1,12 +1,29 @@
 const Discord = require("discord.js")
 const bot = new Discord.Client();
 
+// Get authentication details
+try {
+	var AuthDetails = require("./config.json");
+} catch (e){
+	console.log("Could not find config.json, checking for config vars...");
+	try{
+		var AuthDetails = require("./config-vars")
+	} catch (e){
+		console.log("Could not find config-vars, exiting")
+		process.exit();
+	}
+}
+
 bot.on('ready', () => {
-	console.log('Logged in as ${client.user.username}#${client.user.discriminator}');
+	console.log('Logged in successfully');
 });
 
 bot.on('message', msg => {
 	if (msg.content === 'ping') msg.reply('Pong!');
+
+	if(msg.content == '!commands') msg.reply('No current commands');
+
+	if(msg.content == '!img') bot.sendFile()
 });
 
-bot.login('MjU2NTgzMjE3ODc4OTI1MzIz.CyuSxQ.bGD7hsyHjV5LaVVqCPlHmVnec0o');
+bot.login(AuthDetails.TOKEN);
