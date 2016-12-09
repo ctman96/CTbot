@@ -23,11 +23,17 @@ bot.on('ready', () => {
 });
 
 bot.on('message', msg => {
+	if(msg.content == '!commands'){
+		msg.channel.sendMessage('Available Commands:');
+		msg.channel.sendMessage('ping : check if bot is alive');
+		msg.channel.sendMessage('!img : send test image');
+	}
+
 	if (msg.content === 'ping') msg.reply('Pong!');
 
-	if(msg.content == '!commands') msg.reply('No current commands');
+	if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
 
-	if(msg.content == '!img') bot.sendFile()
+
 });
 
 bot.login(AuthDetails.TOKEN);
