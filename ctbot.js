@@ -129,7 +129,7 @@ bot.on('message', msg => {
 		+'\n!ping : check if bot is alive'
 		+'\n!img : send test image'
 		+'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
-		+'!video [0-'+(ytlength-1)+'] : random video from playlist'
+		+'\n!video [0-'+(ytlength-1)+'] : random video from playlist'
 		msg.channel.sendMessage(commands);
 	}
 
