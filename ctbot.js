@@ -21,9 +21,14 @@ try {
 var giphy_key = "dc6zaTOxFJmzC";
 var youtube_key = AuthDetails.YOUTUBE_KEY;
 var youtube_id = "PLLKyePPBYFXE8wmCJEFC_OalwE-CY9X9z";
+var ytlength = 0;
 
 bot.on('ready', () => {
 	console.log('Logged in successfully');
+	youtube_length(undefined, function(n){
+		ytlength = n;
+		console.log("Found "+ytlength+' videos');
+	});
 });
 
 function get_gif(tags, func){
@@ -49,6 +54,29 @@ function get_gif(tags, func){
 	}.bind(this));
 }
 
+function youtube_length(req,resp){
+	console.log("Getting playlist size");
+	var request = require("request");
+	var q = 'https://www.googleapis.com/youtube/v3/playlistItems?key='+youtube_key+"&part=contentDetails&maxResults=50&playlistId="+youtube_id;
+	console.log("Sending request: "+ q);
+	request(q,function(error,response,body){
+		if (error || response.statusCode !== 200) {
+			console.error("youtube: Got error: " + body);
+			console.log(error);
+		}
+		else {
+			try{
+				var response = JSON.parse(body);
+				var length = response.pageInfo.totalResults;
+				resp(length);
+			}
+			catch (e){
+				resp(undefined)
+			}
+		}
+	}.bind(this));
+}
+
 //pull a random youtube video by recursively searching through the playlist pages
 function get_youtube(args, func){
 	var request = require("request");
@@ -68,10 +96,6 @@ function get_youtube(args, func){
 			try{
 				var response = JSON.parse(body);
 				var length = response.pageInfo.totalResults;
-				if (num >= length || num < 0){
-					console.log('invalid number given');
-					func(undefined);
-				}
 				if (num == undefined){
 					num = Math.floor(Math.random()*(length)+1)-1;
 					console.log("Found "+length+" videos. Getting video #"+num);
@@ -85,22 +109,28 @@ function get_youtube(args, func){
 					});
 				}
 			} catch (e){
+				console.log(e);
 				func(undefined);
 			}
 		}
 	}.bind(this));
 }
 
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
+}
 
 //Todo: move old commands over to new parsing
 bot.on('message', msg => {
 	//List of commands. Make sure to update
 	if(msg.content == '!commands'){
-		msg.channel.sendMessage('Available Commands:');
-		msg.channel.sendMessage('!ping : check if bot is alive');
-		msg.channel.sendMessage('!img : send test image');
-		msg.channel.sendMessage('!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif');
-		msg.channel.sendMessage('!video : random video from playlist');
+		var commands = 'Available Commands:'
+		+'\n!ping : check if bot is alive'
+		+'\n!img : send test image'
+		+'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
+		+'!video [0-'+(ytlength-1)+'] : random video from playlist'
+		msg.channel.sendMessage(commands);
 	}
 
 	if (msg.content === '!ping') msg.reply('Pong!');
@@ -113,6 +143,7 @@ bot.on('message', msg => {
 			var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
 			
 			if (command == 'gif'){
+				console.log('==================');
 				console.log("Command received: "+msg);
 				get_gif(args, function(url){
 					if (url !== undefined){
@@ -124,14 +155,27 @@ bot.on('message', msg => {
 						console.log("Error retrieving gif, returned undefined");
 					}
 				});
+				console.log('==================');
 			}
 
 			if(command == 'video') {
+				console.log('==================');
 				console.log("Command received: "+msg);
+
 				var num = undefined;
-				if (isNaN(args))
-					num = parseInt(args);
-				console.log(num);
+				if (isNormalInteger(args[0])){
+					num = Number(args[0]);
+					if (num > ytlength-1 || num < 0){
+						console.log('invalid number');
+						num = undefined;
+						msg.channel.sendMessage('invalid video number. use 0-'+(ytlength-1)+'. Here\'s a random video')
+					}
+					else{
+						console.log('Requesting video '+num);
+					}
+				}else{
+					console.log('Requesting random video');
+				}
 				get_youtube([num,undefined], function(url){
 					if (url !== undefined){
 						msg.channel.sendMessage(url);
@@ -142,6 +186,7 @@ bot.on('message', msg => {
 						console.log("Error retrieving video, returned undefined");
 					}
 				});
+				console.log('==================');
 			}
 		}
 	}
