@@ -133,6 +133,7 @@ bot.on('message', msg => {
 		+'\n!img : send test image'
 		+'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
 		+'\n!video [0-'+(ytlength-1)+'] : video from playlist. no arguments provides a random video'
+		+'\n!voice [join/kick/play] [channel] : joins/kicks from the voice channel or plays some music. More features in the future, hopefully'
 		msg.channel.sendMessage(commands);
 	}
 
@@ -185,9 +186,7 @@ bot.on('message', msg => {
 					else if (args[0] == 'kick'){
 						console.log('Attempting to disconnect from '+channel);
 						channel.leave();
-						//for(var c of connections){
-							//Todo: remove connection
-						//}
+						//Todo: remove connection
 					}
 					else if (args[0] == 'play'){
 						try{
