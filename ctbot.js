@@ -2,6 +2,7 @@ const Discord = require("discord.js")
 const bot = new Discord.Client();
 const express = require('express')
 const app = express()
+const ytdl = require('ytdl-core')
 
 
 // Get authentication details
@@ -18,10 +19,12 @@ try {
 	console.log("Successfully retrieved process.env")
 }
 
-var giphy_key = "dc6zaTOxFJmzC";
-var youtube_key = AuthDetails.YOUTUBE_KEY;
-var youtube_id = "PLLKyePPBYFXE8wmCJEFC_OalwE-CY9X9z";
+const giphy_key = "dc6zaTOxFJmzC";
+const youtube_key = AuthDetails.YOUTUBE_KEY;
+const youtube_id = "PLLKyePPBYFXE8wmCJEFC_OalwE-CY9X9z";
 var ytlength = 0;
+const streamOptions={seek: 0, volume: 1};
+var connections = [];
 
 bot.on('ready', () => {
 	console.log('Logged in successfully');
@@ -161,12 +164,16 @@ bot.on('message', msg => {
 			if(command == 'voice'){
 				try{
 					var channel = bot.channels.find('name', args[1]);
+					console.log('channel = '+channel);
 
 					if (args[0] == 'join'){
 						try{
 							//TODO: ffmpeg buildpack?
 							channel.join(args[1])
-							.then(connection => console.log("Joined voice channel "+channel.name))
+							.then(connection => {
+								console.log("Joined voice channel "+channel.name);
+								connections[0] = connection;
+							})
 							.catch(console.error);
 							
 						}
@@ -176,17 +183,20 @@ bot.on('message', msg => {
 						}
 					}
 					else if (args[0] == 'kick'){
-						for (var c of bot.voiceConnections){
-							if (c.channel == channel){
-								c.disconnect();
-							}
-						}
+						console.log('Attempting to disconnect from '+channel);
+						channel.leave();
+						//for(var c of connections){
+							//Todo: remove connection
+						//}
 					}
 					else if (args[0] == 'play'){
-						for (var c of bot.voiceConnections){
-							if (c.channel == channel){
-								//TODOc.playRawStream();
-							}
+						try{
+							const stream = ytdl('https://www.youtube.com/watch?v=8iNczzhZmbc', {filter: 'audioonly'});
+							const dispatcher = connections[0].playStream(stream, streamOptions);
+							console.log('Successfly retrieved and played stream')
+						}
+						catch(e){
+							console.log(e);
 						}
 					}
 				}
