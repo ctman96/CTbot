@@ -167,7 +167,7 @@ bot.on('message', msg => {
 							//TODO: ffmpeg buildpack?
 							channel.join(args[1])
 							.then(connection => console.log("Joined voice channel "+channel.name))
-							.catch(error);
+							.catch(console.error);
 							
 						}
 						catch(e){
