@@ -138,13 +138,13 @@ bot.on('message', msg => {
 	if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
 
 	if(msg.content[0] == '!'){
+		console.log('==================');
+		console.log("Command received: "+msg);
 		if(msg.author.id != bot.user.id){
 			var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
 			var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
 			
 			if (command == 'gif'){
-				console.log('==================');
-				console.log("Command received: "+msg);
 				get_gif(args, function(url){
 					if (url !== undefined){
 						msg.channel.sendMessage(url);
@@ -158,10 +158,46 @@ bot.on('message', msg => {
 				console.log('==================');
 			}
 
-			if(command == 'video') {
-				console.log('==================');
-				console.log("Command received: "+msg);
+			if(command == 'voice'){
+				try{
+					var channel = bot.channels.find('name', args[1]);
 
+					if (args[0] == 'join'){
+						try{
+							//TODO: ffmpeg buildpack?
+							channel.join(args[1])
+							.then(connection => console.log("Joined voice channel "+channel.name))
+							.catch(error);
+							
+						}
+						catch(e){
+							console.log(e);
+							msg.channel.sendMessage("Error joining voice channel, sorry");
+						}
+					}
+					else if (args[0] == 'kick'){
+						for (var c of bot.voiceConnections){
+							if (c.channel == channel){
+								c.disconnect();
+							}
+						}
+					}
+					else if (args[0] == 'play'){
+						for (var c of bot.voiceConnections){
+							if (c.channel == channel){
+								//TODOc.playRawStream();
+							}
+						}
+					}
+				}
+				catch(e){
+					console.log(e);
+					msg.channel.sendMessage("Error accessing channel "+ args[1]);
+				}
+				
+			}
+
+			if(command == 'video') {
 				var num = undefined;
 				if (isNormalInteger(args[0])){
 					num = Number(args[0]);
