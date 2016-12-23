@@ -128,12 +128,12 @@ function isNormalInteger(str) {
 bot.on('message', msg => {
 	//List of commands. Make sure to update
 	if(msg.content == '!commands'){
-		var commands = 'Available Commands:'
+		var commands = ('Available Commands:'
 		+'\n!ping : check if bot is alive'
 		+'\n!img : send test image'
 		+'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
 		+'\n!video [0-'+(ytlength-1)+'] : video from playlist. no arguments provides a random video'
-		+'\n!voice [join/kick/play] [channel] : joins/kicks from the voice channel or plays some music. More features in the future, hopefully'
+		+'\n!voice [join/kick/play] [channel] : joins/kicks from the voice channel or plays some music. More features in the future, hopefully');
 		msg.channel.sendMessage(commands);
 	}
 
@@ -192,7 +192,7 @@ bot.on('message', msg => {
 						try{
 							const stream = ytdl('https://www.youtube.com/watch?v=8iNczzhZmbc', {filter: 'audioonly'});
 							const dispatcher = connections[0].playStream(stream, streamOptions);
-							console.log('Successfly retrieved and played stream')
+							console.log('Successfly retrieved and played stream');
 						}
 						catch(e){
 							console.log(e);
