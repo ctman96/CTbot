@@ -133,7 +133,8 @@ bot.on('message', msg => {
 		+'\n!img : send test image'
 		+'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
 		+'\n!video [0-'+(ytlength-1)+'] : video from playlist. no arguments provides a random video'
-		+'\n!voice [join/kick/play] [channel] : joins/kicks from the voice channel or plays some music. More features in the future, hopefully');
+		+'\n!voice [join/kick] [channel] : joins/kicks from the voice channel'
+		+'\n!voice [play] [youtube url] : plays the audio into the voice channel');
 		msg.channel.sendMessage(commands);
 	}
 
@@ -190,7 +191,7 @@ bot.on('message', msg => {
 					}
 					else if (args[0] == 'play'){
 						try{
-							const stream = ytdl('https://www.youtube.com/watch?v=8iNczzhZmbc', {filter: 'audioonly'});
+							const stream = ytdl(args[1], {filter: 'audioonly'});
 							const dispatcher = connections[0].playStream(stream, streamOptions);
 							console.log('Successfly retrieved and played stream');
 						}
