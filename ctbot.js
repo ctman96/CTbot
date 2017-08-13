@@ -134,7 +134,8 @@ bot.on('message', msg => {
 		+'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
 		+'\n!video [0-'+(ytlength-1)+'] : video from playlist. no arguments provides a random video'
 		+'\n!voice [join/kick] [channel] : joins/kicks from the voice channel'
-		+'\n!voice [play] [youtube url] : plays the audio into the voice channel');
+		+'\n!voice [play] [youtube url] : plays the audio into the voice channel'
+		+'\n!roll [number of dice]d[type of die] : rolls dice and sends the result. ex: 2d20 rolls 2 d20 dice');
 		msg.channel.sendMessage(commands);
 	}
 
@@ -233,6 +234,41 @@ bot.on('message', msg => {
 					}
 				});
 				console.log('==================');
+			}
+
+			if(command == 'roll') {
+				//TODO: Add support for modifiers and multiple types of dice in a single roll. Separate on '+'
+				var dice = args[0];
+
+				var i = 0;
+				//Parse the number of dice
+				while(isNormalInteger(dice.charAt(i))){
+					i++;
+				}
+
+				var num = dice.substring(0,i); //Pull out the number of dice to roll
+				var die = dice.substring(i); //Pull out the die info
+
+				if(die.charAt(0) == 'd' || die.charAt(0) == 'D'){
+					die = die.substring(1); //remove the d
+					if(isNormalInteger(die)){
+						die = Number(die);
+						var roll = 0;
+						for (var loop = 0; loop < num; loop++){
+							roll = roll+Math.round(Math.random() * die) % die + 1;
+						}
+						msg.channel.sendMessage(roll);
+                        console.log("Result:"+roll)
+					}
+					else{
+                        msg.channel.sendMessage("Error parsing command. Please Try Again!");
+                        console.log("Error parsing roll");
+					}
+				}
+				else{
+					msg.channel.sendMessage("Error parsing command. Please Try Again!");
+					console.log("Error parsing roll");
+				}
 			}
 		}
 	}
