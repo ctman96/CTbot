@@ -237,38 +237,43 @@ bot.on('message', msg => {
 			}
 
 			if(command == 'roll') {
-				//TODO: Add support for modifiers and multiple types of dice in a single roll. Separate on '+'
-				var dice = args[0];
+				//TODO: Add suport for subtraction or negative modifiers
+				var dice = args[0].split('+');
+				var count = 0;
+				var result = 0;
+				for(var c = 0; c < dice.length; c++) {
+                    //Check if its just a modifier
+                    if (isNormalInteger(dice[c])) {
+                        result = result + Number(dice[c]); //Add modifier to result
+                    }
+                    else {
+                        //Else treat as a die
 
-				var i = 0;
-				//Parse the number of dice
-				while(isNormalInteger(dice.charAt(i))){
-					i++;
-				}
-
-				var num = dice.substring(0,i); //Pull out the number of dice to roll
-				var die = dice.substring(i); //Pull out the die info
-
-				if(die.charAt(0) == 'd' || die.charAt(0) == 'D'){
-					die = die.substring(1); //remove the d
-					if(isNormalInteger(die)){
-						die = Number(die);
-						var roll = 0;
-						for (var loop = 0; loop < num; loop++){
-							roll = roll+Math.round(Math.random() * die) % die + 1;
-						}
-						msg.channel.sendMessage(roll);
-                        console.log("Result:"+roll)
-					}
-					else{
-                        msg.channel.sendMessage("Error parsing command. Please Try Again!");
-                        console.log("Error parsing roll");
-					}
-				}
-				else{
-					msg.channel.sendMessage("Error parsing command. Please Try Again!");
-					console.log("Error parsing roll");
-				}
+                        var i = 0;
+                        //Parse the number of dice
+                        while (isNormalInteger(dice[c].charAt(i))) {
+                            i++;
+                        }
+                        var num = Number(dice[c].substring(0, i)); //Pull out the number of dice to roll
+                        var die = dice[c].substring(i); //Pull out the die info
+                        if (die.charAt(0) == 'd' || die.charAt(0) == 'D') {
+                            die = die.substring(1); //remove the d
+                            if (isNormalInteger(die)) {
+                                die = Number(die);
+                                var roll = 0;
+                                for (var loop = 0; loop < num; loop++) {
+                                    roll = roll + Math.round(Math.random() * die) % die + 1;
+                                }
+                                result = result + roll;
+                            }
+                            else {
+                            }
+                        }
+                        else {
+                        }
+                    }
+                }
+                msg.channel.sendMessage("Result: "+result);
 			}
 		}
 	}
