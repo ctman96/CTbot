@@ -146,6 +146,33 @@ function drawDice(args, func) {
                     }))
             })
     }
+    else if (type == 'advantage'){
+        var outputPath = './img/out/d' + type + 'out' + num + '.png';
+        fs.createReadStream("./img/d8.png")
+            .pipe(new png())
+            .on('parsed', function () {
+                if (value >= 5)
+                    this.drawText(10, 10, '*', this.colors.white(255))
+                this.pack().pipe(fs.createWriteStream(outputPath)
+                    .on('finish', function () {
+                        func(outputPath);
+                    }))
+            })
+    }
+    else if (type == 'challenge'){
+        var outputPath = './img/out/d' + type + 'out' + num + '.png';
+        fs.createReadStream("./img/d10.png")
+            .pipe(new png())
+            .on('parsed', function () {
+                if (value >= 5)
+                    this.drawText(10, 10, '*', this.colors.white(255))
+                this.pack().pipe(fs.createWriteStream(outputPath)
+                    .on('finish', function () {
+                        func(outputPath);
+                    }))
+            })
+
+    }
     else{
     	console.log(type+' is not a compatible type of die to draw')
         func(undefined);
@@ -265,13 +292,28 @@ if(msg.content[0] == '!'){
         }
 
         if(command == 'roll') {
-            //TODO: Replace with custom solution
+            //Go through each of the requested rolls
             for(var i = 0; i < args.length; i++){
                 var dice = new Dice();
-                var result = dice.execute(args[i]);
-                console.log(result);
 
-                var type = result.parsed.faces;
+                //Check for special dice, execute the roll and set the type
+                if(['advantage', 'Advantage', 'adv', 'Adv'].includes(args[i])){
+                    var result = dice.execute('1d8'); //todo: multiple adv/chal dice
+                    console.log(result);
+                    var type = 'advantage';
+                }
+                else if (['challenge', 'Challenge', 'chal', 'Chal'].includes(args[i])){
+                    var result = dice.execute('1d10');
+                    onsole.log(result);
+                    var type = 'challenge'
+                }
+                else {
+                    var result = dice.execute(args[i]);
+                    console.log(result);
+                    var type = result.parsed.faces;
+                }
+
+                //Draw the outcomes onto dice, if applicable.
                 var outcomes = result.outcomes[0].rolls;
                 for (var j = 0; j < outcomes.length; j++) {
                     var outcome = outcomes[j].toString();
@@ -285,6 +327,7 @@ if(msg.content[0] == '!'){
                         })
                     }
                 }
+                //Send the result out
                 msg.channel.sendMessage(result.text);
             }
         }
