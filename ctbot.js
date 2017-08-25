@@ -152,7 +152,7 @@ function drawDice(args, func) {
             .pipe(new png())
             .on('parsed', function () {
                 if (value >= 5)
-                    this.drawText(10, 10, '*', this.colors.white(255))
+                    this.drawText(10, 10, '✔', this.colors.white(255))
                 this.pack().pipe(fs.createWriteStream(outputPath)
                     .on('finish', function () {
                         func(outputPath);
@@ -165,7 +165,7 @@ function drawDice(args, func) {
             .pipe(new png())
             .on('parsed', function () {
                 if (value >= 5)
-                    this.drawText(10, 10, '*', this.colors.white(255))
+                    this.drawText(10, 10, '💀', this.colors.white(255))
                 this.pack().pipe(fs.createWriteStream(outputPath)
                     .on('finish', function () {
                         func(outputPath);
@@ -304,7 +304,7 @@ if(msg.content[0] == '!'){
                 }
                 else if (['challenge', 'Challenge', 'chal', 'Chal'].includes(args[i])){
                     var result = dice.execute('1d10');
-                    onsole.log(result);
+                    console.log(result);
                     var type = 'challenge'
                 }
                 else {
