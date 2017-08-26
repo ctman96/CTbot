@@ -132,6 +132,11 @@ function drawDice(args, func) {
 	var type = args[0];
 	var value = args[1];
 	var num = args[2];
+	var xpos = 10;
+	var ypos = 10;
+	if (value.toString().length > 1){
+	    xpos =  xpos-(value.toString().length+1)
+    }
 
     if ([4,6,8,10,12,20].includes(type)) {
         var outputPath = './img/out/d' + type + 'out' + num + '.png';
@@ -139,7 +144,7 @@ function drawDice(args, func) {
         fs.createReadStream("./img/d" + type + ".png")
             .pipe(new png())
             .on('parsed', function () {
-                this.drawText(10, 10, value, this.colors.white(255))
+                this.drawText(xpos, ypos, value, this.colors.white(255))
                 this.pack().pipe(fs.createWriteStream(outputPath)
                     .on('finish', function () {
                         func(outputPath);
@@ -152,7 +157,7 @@ function drawDice(args, func) {
             .pipe(new png())
             .on('parsed', function () {
                 if (value >= 5)
-                    this.drawText(10, 10, '✔', this.colors.white(255))
+                    this.drawText(10, 10, 'O', this.colors.white(255))
                 this.pack().pipe(fs.createWriteStream(outputPath)
                     .on('finish', function () {
                         func(outputPath);
@@ -165,7 +170,7 @@ function drawDice(args, func) {
             .pipe(new png())
             .on('parsed', function () {
                 if (value >= 5)
-                    this.drawText(10, 10, '💀', this.colors.white(255))
+                    this.drawText(10, 10, 'X', this.colors.white(255))
                 this.pack().pipe(fs.createWriteStream(outputPath)
                     .on('finish', function () {
                         func(outputPath);
@@ -318,7 +323,27 @@ if(msg.content[0] == '!'){
                 for (var j = 0; j < outcomes.length; j++) {
                     var outcome = outcomes[j].toString();
                     if (type == 100){
-                    	//todo
+                    	//todo: do two draws, one for the 00, and one for the ones
+                        var outstring = outcome.toString();
+                        var tens = outcome.substring(0,outstring.length-1)+'0';
+                        var ones = outcome.substring(outstring.length-1, outstring.length);
+                        console.log('outcome: '+outstring+', tens: '+tens+', ones: '+ones);
+                        if (tens == '0')
+                            tens = '00';
+                        if (outstring == '100') {
+                            tens = '00';
+                            ones = '0';
+                        }
+                        drawDice([10,tens,j+100], function(dOut){ //uhh, it works
+                            if (dOut !== undefined)
+                                msg.channel.sendFile(dOut);
+                        })
+                        drawDice([10,ones,j], function(dOut){
+                            if (dOut !== undefined)
+                                msg.channel.sendFile(dOut);
+                        })
+
+
 					}
 					else {
                         drawDice([type, outcome, j], function (dOut) {
