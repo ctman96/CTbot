@@ -336,7 +336,7 @@ if(msg.content[0] == '!'){
                         }
                         drawDice([10,tens,j+100], function(dOut){ //uhh, it works
                             if (dOut !== undefined)
-                                msg.channel.sendFile(dOut);
+                                msg.channel.sendFile(dOut); //todo: delete file after sending
                         })
                         drawDice([10,ones,j], function(dOut){
                             if (dOut !== undefined)
