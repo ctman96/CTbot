@@ -301,14 +301,24 @@ if(msg.content[0] == '!'){
             for(var i = 0; i < args.length; i++){
                 var dice = new Dice();
 
+                var pattAdv = /^\d*\d*(adv|advantage)$/ig;
+                var pattChal = /^\d*\d*(chal|challenge)$/ig;
                 //Check for special dice, execute the roll and set the type
-                if(['advantage', 'Advantage', 'adv', 'Adv'].includes(args[i])){
-                    var result = dice.execute('1d8'); //todo: multiple adv/chal dice
+                if(pattAdv.test(args[i])){
+                    var num = args[i].match(/\d+/)[0]; //Pull the number from the start
+                    if (num == undefined)
+                        num = 1;
+                    console.log('Executing '+num+' advantage roll(s)');
+                    var result = dice.execute(num+'d8');
                     console.log(result);
                     var type = 'advantage';
                 }
-                else if (['challenge', 'Challenge', 'chal', 'Chal'].includes(args[i])){
-                    var result = dice.execute('1d10');
+                else if (pattChal.test(args[i])){
+                    var num = args[i].match(/\d+/)[0]; //Pull the number from the start
+                    if (num == undefined)
+                        num = 1;
+                    console.log('Executing '+num+' challenge roll(s)');
+                    var result = dice.execute(num+'d10');
                     console.log(result);
                     var type = 'challenge'
                 }
@@ -323,7 +333,6 @@ if(msg.content[0] == '!'){
                 for (var j = 0; j < outcomes.length; j++) {
                     var outcome = outcomes[j].toString();
                     if (type == 100){
-                    	//todo: do two draws, one for the 00, and one for the ones
                         var outstring = outcome.toString();
                         var tens = outcome.substring(0,outstring.length-1)+'0';
                         var ones = outcome.substring(outstring.length-1, outstring.length);
