@@ -305,18 +305,24 @@ if(msg.content[0] == '!'){
                 var pattChal = /^\d*\d*(chal|challenge)$/ig;
                 //Check for special dice, execute the roll and set the type
                 if(pattAdv.test(args[i])){
-                    var num = args[i].match(/\d+/)[0]; //Pull the number from the start
-                    if (num == undefined)
+                    var num = args[i].match(/\d+/); //Pull the number from the start
+                    if (num == undefined) {
                         num = 1;
+                    }else if (num.length > 1){
+                        num = num[0];
+                    }
                     console.log('Executing '+num+' advantage roll(s)');
                     var result = dice.execute(num+'d8');
                     console.log(result);
                     var type = 'advantage';
                 }
                 else if (pattChal.test(args[i])){
-                    var num = args[i].match(/\d+/)[0]; //Pull the number from the start
-                    if (num == undefined)
+                    var num = args[i].match(/\d+/); //Pull the number from the start
+                    if (num == undefined) {
                         num = 1;
+                    }else if (num.length > 1){
+                        num = num[0];
+                    }
                     console.log('Executing '+num+' challenge roll(s)');
                     var result = dice.execute(num+'d10');
                     console.log(result);
