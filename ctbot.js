@@ -22,6 +22,14 @@ try {
     console.log("Successfully retrieved process.env")
 }
 
+//Setup Folders
+if (!fs.existsSync('./img')){
+    fs.mkdirSync('./img');
+}
+if (!fs.existsSync('./img/out')){
+    fs.mkdirSync('./img/out');
+}
+
 const giphy_key = "dc6zaTOxFJmzC";
 const youtube_key = AuthDetails.YOUTUBE_KEY;
 const youtube_id = "PLLKyePPBYFXE8wmCJEFC_OalwE-CY9X9z";
@@ -350,20 +358,32 @@ if(msg.content[0] == '!'){
                             ones = '0';
                         }
                         drawDice([10,tens,j+100], function(dOut){ //uhh, it works
-                            if (dOut !== undefined)
-                                msg.channel.sendFile(dOut); //todo: delete file after sending
+                            if (dOut !== undefined) {
+                                msg.channel.sendFile(dOut)
+                                    .then(function(message){
+                                        fs.unlink(dOut);
+                                    });
+                            }
                         })
                         drawDice([10,ones,j], function(dOut){
-                            if (dOut !== undefined)
-                                msg.channel.sendFile(dOut);
+                            if (dOut !== undefined) {
+                                msg.channel.sendFile(dOut)
+                                    .then(function(message){
+                                        fs.unlink(dOut);
+                                    });
+                            }
                         })
 
 
 					}
 					else {
                         drawDice([type, outcome, j], function (dOut) {
-                            if (dOut !== undefined)
-                                msg.channel.sendFile(dOut);
+                            if (dOut !== undefined) {
+                                msg.channel.sendFile(dOut)
+                                    .then(function(message){
+                                        fs.unlink(dOut);
+                                    });
+                            }
                         })
                     }
                 }
