@@ -39,11 +39,11 @@ var connections = [];
 
 bot.on('ready', () => {
     console.log('Logged in successfully');
-youtube_length(undefined, function(n){
-    ytlength = n;
-    console.log("Found "+ytlength+' videos');
-});
-bot.user.setGame('Testing');
+    youtube_length(undefined, function(n){
+        ytlength = n;
+        console.log("Found "+ytlength+' videos');
+    });
+    //bot.user.setGame('Testing');
 });
 
 function get_gif(tags, func){
@@ -192,207 +192,206 @@ function drawDice(args, func) {
 	}
 }
 
-//Todo: move old commands over to new parsing
 bot.on('message', msg => {
-    //List of commands. Make sure to update
-    if(msg.content == '!commands'){
-    var commands = ('Available Commands:'
-    +'\n!ping : check if bot is alive'
-    +'\n!img : send test image'
-    +'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
-    +'\n!video [0-'+(ytlength-1)+'] : video from playlist. no arguments provides a random video'
-    +'\n!voice [join/kick] [channel] : joins/kicks from the voice channel'
-    +'\n!voice [play] [youtube url] : plays the audio into the voice channel'
-    +'\n!roll [number of dice]d[type of die] : rolls dice and sends the result. ex: 2d20 rolls 2 d20 dice');
-    msg.channel.sendMessage(commands);
-}
+    if(msg.content[0] == '!'){
+        console.log('==================');
+        console.log("Command received: "+msg);
+        if(msg.author.id != bot.user.id){
+            var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
+            var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
 
-if (msg.content === '!ping') msg.reply('Pong!');
-
-if(msg.content == '!img') msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
-
-if(msg.content[0] == '!'){
-    console.log('==================');
-    console.log("Command received: "+msg);
-    if(msg.author.id != bot.user.id){
-        var command = msg.content.split(" ")[0].substring(1); //Gets the command name, minus the '!'
-        var args = msg.content.substring(command.length+2).split(" "); //2 because ! and ' '
-
-        if (command == 'gif'){
-            get_gif(args, function(url){
-                if (url !== undefined){
-                    msg.channel.sendMessage(url);
-                    console.log("Successfully retrieved gif:"+url);
-                }
-                else{
-                    msg.channel.sendMessage("Error retrieving gif. Sorry!");
-                    console.log("Error retrieving gif, returned undefined");
-                }
-            });
-            console.log('==================');
-        }
-
-        if(command == 'voice'){
-            try{
-                var channel = bot.channels.find('name', args[1]);
-                console.log('channel = '+channel);
-
-                if (args[0] == 'join'){
-                    try{
-                        //TODO: ffmpeg buildpack?
-                        channel.join(args[1])
-                            .then(connection => {
-                            console.log("Joined voice channel "+channel.name);
-                        connections[0] = connection;
-                    })
-                    .catch(console.error);
-
-                    }
-                    catch(e){
-                        console.log(e);
-                        msg.channel.sendMessage("Error joining voice channel, sorry");
-                    }
-                }
-                else if (args[0] == 'kick'){
-                    console.log('Attempting to disconnect from '+channel);
-                    channel.leave();
-                    //Todo: remove connection
-                }
-                else if (args[0] == 'play'){
-                    try{
-                        const stream = ytdl(args[1], {filter: 'audioonly'});
-                        const dispatcher = connections[0].playStream(stream, streamOptions);
-                        console.log('Successfly retrieved and played stream');
-                    }
-                    catch(e){
-                        console.log(e);
-                    }
-                }
+            if (command == 'commands'){
+                //List of commands. Make sure to update
+                var commands = ('Available Commands:'
+                +'\n!ping : check if bot is alive'
+                +'\n!img : send test image'
+                +'\n!gif [tag1 tag2 ...] : random gif from the tags. if given no arguments, finds random gif'
+                +'\n!video [0-'+(ytlength-1)+'] : video from playlist. no arguments provides a random video'
+                +'\n!voice [join/kick] [channel] : joins/kicks from the voice channel'
+                +'\n!voice [play] [youtube url] : plays the audio into the voice channel'
+                +'\n!roll [number of dice]d[type of die] : rolls dice and sends the result. ex: 2d20 rolls 2 d20 dice');
+                msg.channel.sendMessage(commands);
             }
-            catch(e){
-                console.log(e);
-                msg.channel.sendMessage("Error accessing channel "+ args[1]);
+            if (command == 'ping'){
+                msg.reply('Pong!')
             }
 
-        }
-
-        if(command == 'video') {
-            var num = undefined;
-            if (isNormalInteger(args[0])){
-                num = Number(args[0]);
-                if (num > ytlength-1 || num < 0){
-                    console.log('invalid number');
-                    num = undefined;
-                    msg.channel.sendMessage('invalid video number. use 0-'+(ytlength-1)+'. Here\'s a random video')
-                }
-                else{
-                    console.log('Requesting video '+num);
-                }
-            }else{
-                console.log('Requesting random video');
+            if (command == 'img'){
+                msg.channel.sendFile('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Video-Game-Controller-Icon-IDV-edit.svg/2000px-Video-Game-Controller-Icon-IDV-edit.svg.png');
             }
-            get_youtube([num,undefined], function(url){
-                if (url !== undefined){
-                    msg.channel.sendMessage(url);
-                    console.log("Successfully retrieved video:"+url);
-                }
-                else{
-                    msg.channel.sendMessage("Error retrieving video. Sorry!");
-                    console.log("Error retrieving video, returned undefined");
-                }
-            });
-            console.log('==================');
-        }
-
-        if(command == 'roll') {
-            //Go through each of the requested rolls
-            for(var i = 0; i < args.length; i++){
-                var dice = new Dice();
-
-                var pattAdv = /^\d*\d*(adv|advantage)$/ig;
-                var pattChal = /^\d*\d*(chal|challenge)$/ig;
-                //Check for special dice, execute the roll and set the type
-                if(pattAdv.test(args[i])){
-                    var num = args[i].match(/\d+/); //Pull the number from the start
-                    if (num == undefined) {
-                        num = 1;
-                    }else if (num.length > 1){
-                        num = num[0];
+            if (command == 'gif'){
+                get_gif(args, function(url){
+                    if (url !== undefined){
+                        msg.channel.sendMessage(url);
+                        console.log("Successfully retrieved gif:"+url);
                     }
-                    console.log('Executing '+num+' advantage roll(s)');
-                    var result = dice.execute(num+'d8');
-                    console.log(result);
-                    var type = 'advantage';
-                }
-                else if (pattChal.test(args[i])){
-                    var num = args[i].match(/\d+/); //Pull the number from the start
-                    if (num == undefined) {
-                        num = 1;
-                    }else if (num.length > 1){
-                        num = num[0];
+                    else{
+                        msg.channel.sendMessage("Error retrieving gif. Sorry!");
+                        console.log("Error retrieving gif, returned undefined");
                     }
-                    console.log('Executing '+num+' challenge roll(s)');
-                    var result = dice.execute(num+'d10');
-                    console.log(result);
-                    var type = 'challenge'
-                }
-                else {
-                    var result = dice.execute(args[i]);
-                    console.log(result);
-                    var type = result.parsed.faces;
-                }
+                });
+                console.log('==================');
+            }
 
-                //Draw the outcomes onto dice, if applicable.
-                var outcomes = result.outcomes[0].rolls;
-                for (var j = 0; j < outcomes.length; j++) {
-                    var outcome = outcomes[j].toString();
-                    if (type == 100){
-                        var outstring = outcome.toString();
-                        var tens = outcome.substring(0,outstring.length-1)+'0';
-                        var ones = outcome.substring(outstring.length-1, outstring.length);
-                        console.log('outcome: '+outstring+', tens: '+tens+', ones: '+ones);
-                        if (tens == '0')
-                            tens = '00';
-                        if (outstring == '100') {
-                            tens = '00';
-                            ones = '0';
+            if(command == 'voice'){
+                try{
+                    var channel = bot.channels.find('name', args[1]);
+                    console.log('channel = '+channel);
+
+                    if (args[0] == 'join'){
+                        try{
+                            channel.join(args[1])
+                                .then(connection => {
+                                    console.log("Joined voice channel "+channel.name);
+                                    connections[0] = connection;
+                                })
+                                .catch(console.error);
                         }
-                        drawDice([10,tens,j+100], function(dOut){ //uhh, it works
-                            if (dOut !== undefined) {
-                                msg.channel.sendFile(dOut)
-                                    .then(function(message){
-                                        fs.unlink(dOut);
-                                    });
-                            }
-                        })
-                        drawDice([10,ones,j], function(dOut){
-                            if (dOut !== undefined) {
-                                msg.channel.sendFile(dOut)
-                                    .then(function(message){
-                                        fs.unlink(dOut);
-                                    });
-                            }
-                        })
-
-
-					}
-					else {
-                        drawDice([type, outcome, j], function (dOut) {
-                            if (dOut !== undefined) {
-                                msg.channel.sendFile(dOut)
-                                    .then(function(message){
-                                        fs.unlink(dOut);
-                                    });
-                            }
-                        })
+                        catch(e){
+                            console.log(e);
+                            msg.channel.sendMessage("Error joining voice channel, sorry");
+                        }
+                    }
+                    else if (args[0] == 'kick'){
+                        console.log('Attempting to disconnect from '+channel);
+                        channel.leave();
+                        //Todo: remove connection
+                    }
+                    else if (args[0] == 'play'){
+                        try{
+                            const stream = ytdl(args[1], {filter: 'audioonly'});
+                            const dispatcher = connections[0].playStream(stream, streamOptions);
+                            console.log('Successfly retrieved and played stream');
+                        }
+                        catch(e){
+                            console.log(e);
+                        }
                     }
                 }
-                //Send the result out
-                msg.channel.sendMessage(result.text);
+                catch(e){
+                    console.log(e);
+                    msg.channel.sendMessage("Error accessing channel "+ args[1]);
+                }
+
+            }
+
+            if(command == 'video') {
+                var num = undefined;
+                if (isNormalInteger(args[0])){
+                    num = Number(args[0]);
+                    if (num > ytlength-1 || num < 0){
+                        console.log('invalid number');
+                        num = undefined;
+                        msg.channel.sendMessage('invalid video number. use 0-'+(ytlength-1)+'. Here\'s a random video')
+                    }
+                    else{
+                        console.log('Requesting video '+num);
+                    }
+                }else{
+                    console.log('Requesting random video');
+                }
+                get_youtube([num,undefined], function(url){
+                    if (url !== undefined){
+                        msg.channel.sendMessage(url);
+                        console.log("Successfully retrieved video:"+url);
+                    }
+                    else{
+                        msg.channel.sendMessage("Error retrieving video. Sorry!");
+                        console.log("Error retrieving video, returned undefined");
+                    }
+                });
+                console.log('==================');
+            }
+
+            if(command == 'roll') {
+                //Go through each of the requested rolls
+                for(var i = 0; i < args.length; i++){
+                    var dice = new Dice();
+
+                    var pattAdv = /^\d*\d*(adv|advantage)$/ig;
+                    var pattChal = /^\d*\d*(chal|challenge)$/ig;
+                    //Check for special dice, execute the roll and set the type
+                    if(pattAdv.test(args[i])){
+                        var num = args[i].match(/\d+/); //Pull the number from the start
+                        if (num == undefined) {
+                            num = 1;
+                        }else if (num.length > 1){
+                            num = num[0];
+                        }
+                        console.log('Executing '+num+' advantage roll(s)');
+                        var result = dice.execute(num+'d8');
+                        console.log(result);
+                        var type = 'advantage';
+                    }
+                    else if (pattChal.test(args[i])){
+                        var num = args[i].match(/\d+/); //Pull the number from the start
+                        if (num == undefined) {
+                            num = 1;
+                        }else if (num.length > 1){
+                            num = num[0];
+                        }
+                        console.log('Executing '+num+' challenge roll(s)');
+                        var result = dice.execute(num+'d10');
+                        console.log(result);
+                        var type = 'challenge'
+                    }
+                    else {
+                        var result = dice.execute(args[i]);
+                        console.log(result);
+                        var type = result.parsed.faces;
+                    }
+
+                    //Draw the outcomes onto dice, if applicable.
+                    var outcomes = result.outcomes[0].rolls;
+                    for (var j = 0; j < outcomes.length; j++) {
+                        var outcome = outcomes[j].toString();
+                        if (type == 100){
+                            var outstring = outcome.toString();
+                            var tens = outcome.substring(0,outstring.length-1)+'0';
+                            var ones = outcome.substring(outstring.length-1, outstring.length);
+                            console.log('outcome: '+outstring+', tens: '+tens+', ones: '+ones);
+                            if (tens == '0')
+                                tens = '00';
+                            if (outstring == '100') {
+                                tens = '00';
+                                ones = '0';
+                            }
+                            drawDice([10,tens,j+100], function(dOut){ //uhh, it works
+                                if (dOut !== undefined) {
+                                    msg.channel.sendFile(dOut)
+                                        .then(function(message){
+                                            fs.unlink(dOut);
+                                        });
+                                }
+                            })
+                            drawDice([10,ones,j], function(dOut){
+                                if (dOut !== undefined) {
+                                    msg.channel.sendFile(dOut)
+                                        .then(function(message){
+                                            fs.unlink(dOut);
+                                        });
+                                }
+                            })
+
+
+                        }
+                        else {
+                            drawDice([type, outcome, j], function (dOut) {
+                                if (dOut !== undefined) {
+                                    msg.channel.sendFile(dOut)
+                                        .then(function(message){
+                                            fs.unlink(dOut);
+                                        });
+                                }
+                            })
+                        }
+                    }
+                    //Send the result out
+                    msg.channel.sendMessage(result.text);
+                }
             }
         }
     }
-}
 });
 
 bot.login(AuthDetails.TOKEN);
