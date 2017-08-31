@@ -37,14 +37,43 @@ var ytlength = 0;
 const streamOptions={seek: 0, volume: 1};
 var connections = [];
 
+var cardsRemaining = [];
+
 bot.on('ready', () => {
     console.log('Logged in successfully');
+
+    //Initialize Youtube Video playlist length
     youtube_length(undefined, function(n){
         ytlength = n;
         console.log("Found "+ytlength+' videos');
     });
+    
+    //Initialize Deck of Quirks
+    resetDeck();
     //bot.user.setGame('Testing');
 });
+
+//Todo: make more stable. read actual file names. Ensure directories exist.
+function resetDeck(){
+	cardsRemaining = [];
+	fs.readdir('./img/quirks', (err,cards) => {
+    	console.log('Found '+cards.length+' cards');
+    	for (var i = 1; i <= cards.length; i++){
+    		var num = i;
+    		if (num < 10)
+    			num = '0'+num;
+    		cardsRemaining.push('./img/quirks/Deck of Quirks-'+num+'.jpg');
+    	}
+    	//console.log(cardsRemaining);
+    });
+}
+
+function drawCard(func){
+	var i = Math.floor(Math.random() * cardsRemaining.length)
+	var card = cardsRemaining[i];
+	cardsRemaining.splice(i,1);
+	func(card);
+}
 
 function get_gif(tags, func){
     var request = require("request")
@@ -389,6 +418,23 @@ bot.on('message', msg => {
                     //Send the result out
                     msg.channel.sendMessage(result.text);
                 }
+            }
+            if (command == 'quirks'){
+            	if (args[0] == 'reset'){
+            		resetDeck();
+            	}
+            	if (args[0] == 'draw'){
+            		drawCard(function(card){
+            			console.log('Drew card: '+card);
+            			if (card !== undefined){
+            				msg.channel.sendFile(card);
+            			}
+            		})
+            	}
+            	if (args[0] == 'remaining'){
+            		console.log(cardsRemaining);
+            		msg.channel.sendMessage('There are '+cardsRemaining.length+' cards left in the deck');
+            	}
             }
         }
     }
